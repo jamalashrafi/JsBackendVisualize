@@ -1,7 +1,12 @@
 export class TodoModal {
-    public todoItem: string;
+    private static lastKey = 0;
 
-    constructor(todoItem: string){
+    public todoKey: number;
+    public todoItem: string;
+    
+    constructor(todoItem: string) {
+        this.todoKey = ++TodoModal.lastKey;
         this.todoItem = todoItem;
+        
     }
 }

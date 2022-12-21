@@ -1,13 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TodoComponent = void 0;
-const TodoModal_1 = require("./TodoModal");
+const TodoService_1 = require("./TodoService");
+//! M - V - (C O N T R O L L E R)
 class TodoComponent {
     constructor(selector) {
-        var _a;
         this.todoList = [];
+        const todoServiceObj = new TodoService_1.TodoService();
         //* Gets Todos from Local storage
-        this.todoList = JSON.parse((_a = localStorage.getItem('Todos')) !== null && _a !== void 0 ? _a : "[]");
+        //! R E M O V E D (Now moved the logic to service class)
+        // this.todoList = JSON.parse(localStorage.getItem('Todos') ?? "[]");
+        this.todoList = todoServiceObj.getAllTodos();
         const template = `
         <div>
             <input type="text" id="todo-input" placeholder="Enter text here" />
@@ -15,26 +18,33 @@ class TodoComponent {
             <ul id="item-list"></ul>
        </div>
         `;
-        //-* Process the given "string " and convert to DOM element
+        //* Process the given "string " and convert to DOM element
         const root = document.querySelector(selector);
         root === null || root === void 0 ? void 0 : root.insertAdjacentHTML("beforeend", template);
         const addTodo = document.querySelector("#todo-button");
         const itemList = document.querySelector("#item-list");
         const todoInput = document.querySelector("#todo-input");
-        //- Render the todoList on Dom
+        //* Render the todoList on Dom
         this.todoList.forEach((todo) => {
             const item = todo.todoItem;
-            itemList.insertAdjacentHTML('beforeend', `<li>${item}</li>`);
+            itemList.insertAdjacentHTML("beforeend", `<li>${item}</li>`);
         });
         addTodo.addEventListener("click", () => {
-            const todoInputValue = new TodoModal_1.TodoModal(todoInput === null || todoInput === void 0 ? void 0 : todoInput.value);
+            //* Writes the updated list to local storgae
+            //! R E M O V E D (Now moved the logic to service class)
+            // localStorage.setItem("Todos", JSON.stringify(this.todoList));
+            const todoInputValue = todoServiceObj.createTodo(todoInput === null || todoInput === void 0 ? void 0 : todoInput.value);
             this.todoList.push(todoInputValue);
-            localStorage.setItem("Todos", JSON.stringify(this.todoList));
-            //Prepare the li element
-            const todoItem = `<li>${todoInput === null || todoInput === void 0 ? void 0 : todoInput.value}</li>`;
-            //Add it
+            //* Prepare the li element
+            const todoItem = `<li id='todo-${todoInputValue.todoKey}'>${todoInput === null || todoInput === void 0 ? void 0 : todoInput.value} <button style="outline:none">X</button></li>`;
+            //* Add it
             itemList.insertAdjacentHTML("beforeend", todoItem);
-            //Make input null again
+            const liButton = document.querySelector(`#todo-${todoInputValue.todoKey} > button`);
+            liButton === null || liButton === void 0 ? void 0 : liButton.addEventListener("click", () => {
+                todoServiceObj.deleteTodo(todoInputValue.todoKey);
+                location.reload();
+            });
+            //* Make input null again
             todoInput.value = "";
         });
     }
